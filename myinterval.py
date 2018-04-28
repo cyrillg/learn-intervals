@@ -2,16 +2,17 @@
 # -*- coding: utf-8 -*-
 
 from math import inf, exp, log
-nan = float('nan')
+NAN = float('NAN')
+
 
 class Interval(object):
 
     """Definition of the interval type"""
 
     def __init__(self, lower, upper):
-        if nan in [lower, upper]:
-            self.lower = nan
-            self.upper = nan
+        if NAN in [lower, upper]:
+            self.lower = NAN
+            self.upper = NAN
         elif lower > upper:
             raise ValueError('''Upper bound lower than the lower bound''')
         else:
@@ -19,21 +20,35 @@ class Interval(object):
             self.upper = upper
 
     def __add__(self, other):
-        return Interval(self.lower + other.lower, self.upper + other.upper)
+        if isinstance(other, self.__class__):
+            return Interval(self.lower + other.lower, self.upper + other.upper)
+
+        return self.__add__(Interval(other, other))
+
+    def __radd__(self, other):
+        return self.__add__(Interval(other, other))
 
     def __sub__(self, other):
-        return Interval(self.lower - other.upper, self.upper - other.lower)
+        if isinstance(other, self.__class__):
+            return Interval(self.lower - other.upper, self.upper - other.lower)
+
+        return self.__sub__(Interval(other, other))
+
+    def __rsub__(self, other):
+        return self.__sub__(Interval(other, other))
 
     def __mul__(self, other):
-        bounds = [self.lower * other.lower,
-                  self.lower * other.upper,
-                  self.upper * other.lower,
-                  self.upper * other.upper]
+        if isinstance(other, self.__class__):
+            bounds = [self.lower * other.lower,
+                      self.lower * other.upper,
+                      self.upper * other.lower,
+                      self.upper * other.upper]
+            return Interval(min(bounds), max(bounds))
 
-        return Interval(min(bounds), max(bounds))
+        return self.__mul__(Interval(other, other))
 
-    def __rmul__(self, nb):
-        return self.__mul__(Interval(nb, nb))
+    def __rmul__(self, other):
+        return self.__mul__(Interval(other, other))
 
     def __truediv__(self, other):
         if 0 in other:
@@ -52,13 +67,20 @@ class Interval(object):
     def __contains__(self, number):
         return self.lower <= number <= self.upper
 
+    def __bool__(self):
+        return NAN not in [self.lower, self.upper]
+
+
+    def is_empty(self, number):
+        return self.lower <= number <= self.upper
+
 
 def exp_i(x):
     return Interval(exp(x.lower), exp(x.upper))
 
 def log_i(x):
     if x.upper <= 0:
-        return Interval(nan, nan)
+        return Interval(NAN, NAN)
     elif x.lower <= 0:
         return Interval(-inf, log(x.upper))
     else:
@@ -91,3 +113,8 @@ if __name__ == "__main__":
     print("[-1, 3] * [2, 5] = %s" % (x * y))
     print("[-1, 3] / [2, 5] = %s" % (x / y))
     print("[f]([-2, 2]) = %s" % func_f(z))
+
+    print(2 * x)
+    print(x * 2)
+    print(x + 1)
+    print(1 + x)
