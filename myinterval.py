@@ -14,7 +14,7 @@ class Interval(object):
             self.lower = NAN
             self.upper = NAN
         elif lower > upper:
-            raise ValueError('''Upper bound lower than the lower bound''')
+            raise ValueError("Upper bound lower than the lower bound")
         else:
             self.lower = lower
             self.upper = upper
@@ -33,6 +33,18 @@ class Interval(object):
             return Interval(self.lower - other.upper, self.upper - other.lower)
 
         return self.__sub__(Interval(other, other))
+
+    def __and__(self, other):
+        if self.is_empty() or other.is_empty():
+            return Interval(NAN, NAN)
+
+        max_lower = max(self.lower, other.lower)
+        min_upper = min(self.upper, other.upper)
+
+        if max_lower > min_upper:
+            return Interval(NAN, NAN)
+
+        return Interval(max_lower, min_upper)
 
     def __rsub__(self, other):
         return self.__sub__(Interval(other, other))
@@ -67,13 +79,27 @@ class Interval(object):
     def __contains__(self, number):
         return self.lower <= number <= self.upper
 
-    def __bool__(self):
-        return NAN not in [self.lower, self.upper]
+    def is_empty(self):
+        return NAN in [self.lower, self.upper]
 
+    def width(self):
+        if self.is_empty():
+            return NAN
+        return self.upper - self.lower
 
-    def is_empty(self, number):
-        return self.lower <= number <= self.upper
+    def left(self):
+        w = self.width()
+        return Interval(self.lower, self.upper - w / 2.)
 
+    def right(self):
+        w = self.width()
+        return Interval(self.lower + w / 2., self.upper)
+
+    def subset(self, other):
+        if self.is_empty():
+            return True
+
+        return (self.lower in other) and (self.upper in other)
 
 def exp_i(x):
     return Interval(exp(x.lower), exp(x.upper))
@@ -81,18 +107,18 @@ def exp_i(x):
 def log_i(x):
     if x.upper <= 0:
         return Interval(NAN, NAN)
-    elif x.lower <= 0:
-        return Interval(-inf, log(x.upper))
-    else:
-        return Interval(log(x.lower), log(x.upper))
 
+    if x.lower <= 0:
+        return Interval(-inf, log(x.upper))
+
+    return Interval(log(x.lower), log(x.upper))
 
 def sqr_i(x):
     bounds = [x.lower**2, x.upper**2]
     if 0 in x:
         return Interval(0, max(bounds))
-    else:
-        return Interval(min(bounds), max(bounds))
+
+    return Interval(min(bounds), max(bounds))
 
 def min_i(x, y):
     return Interval(min(x.lower, y.lower), min(x.upper, y.upper))
@@ -113,8 +139,3 @@ if __name__ == "__main__":
     print("[-1, 3] * [2, 5] = %s" % (x * y))
     print("[-1, 3] / [2, 5] = %s" % (x / y))
     print("[f]([-2, 2]) = %s" % func_f(z))
-
-    print(2 * x)
-    print(x * 2)
-    print(x + 1)
-    print(1 + x)
