@@ -24,6 +24,10 @@ class Box(object):
 
         return descr
 
+    def is_empty(self):
+        test = [intvl.is_empty() for intvl in self.intvl_list]
+        return True in test
+
 
     def width(self):
         for intvl in self.intvl_list:

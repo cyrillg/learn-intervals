@@ -11,13 +11,21 @@ from mycontractor import cadd, csqr
 
 def cin_ring(x, y, cx, cy, r):
     a = x - cx
+    #  print("a: ", a)
     b = y - cy
+    #  print("b: ", b)
     a2 = sqr_i(a)
+    #  print("a2: ", a2)
     b2 = sqr_i(b)
+    #  print("b2: ", b2)
     r2 = sqr_i(r)
+    #  print("r2: ", r2)
     r2, a2, b2 = cadd(r2, a2, b2)
+    #  print("r2, a2, b2:", r2, a2, b2)
     a2, a = csqr(a2, a)
+    #  print("a2, a: ", a2, a)
     b2, b = csqr(b2, b)
+    #  print("b2, b: ", b2, b)
     x, a, cx = cadd(x, a, cx)
     y, b, cy = cadd(y, b, cy)
 
