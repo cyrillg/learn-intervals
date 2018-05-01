@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from math import inf, exp, log, sqrt
+from math import inf, exp, log, sqrt, isnan
 NAN = float('NAN')
 
 
@@ -90,7 +90,7 @@ class Interval(object):
         return self.lower <= number <= self.upper
 
     def is_empty(self):
-        return NAN in [self.lower, self.upper]
+        return isnan(self.lower) or isnan(self.upper)
 
     def width(self):
         if self.is_empty():
