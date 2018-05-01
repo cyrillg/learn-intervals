@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from math import inf, exp, log
+from math import inf, exp, log, sqrt
 NAN = float('NAN')
 
 
@@ -33,6 +33,16 @@ class Interval(object):
             return Interval(self.lower - other.upper, self.upper - other.lower)
 
         return self.__sub__(Interval(other, other))
+
+    def __or__(self, other):
+        if self.is_empty():
+            return other
+
+        if other.is_empty():
+            return self
+
+        return Interval(min(self.lower, other.lower),
+                        max(self.upper, other.upper))
 
     def __and__(self, other):
         if self.is_empty() or other.is_empty():
@@ -119,6 +129,11 @@ def sqr_i(x):
         return Interval(0, max(bounds))
 
     return Interval(min(bounds), max(bounds))
+
+def sqrt_i(x):
+    x = x & Interval(0, inf)
+
+    return Interval(sqrt(x.lower), sqrt(x.upper))
 
 def min_i(x, y):
     return Interval(min(x.lower, y.lower), min(x.upper, y.upper))
